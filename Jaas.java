@@ -53,7 +53,6 @@ import javax.security.auth.callback.*;
 
 public class Jaas {
     private static String name;
-    private static final boolean verbose = false;
 
     public static void main(String[] args) throws Exception {
 	if (args.length > 0) {
@@ -62,14 +61,11 @@ public class Jaas {
 	    name = "client";
 	}
 
-	// Create action to perform
-	PrivilegedExceptionAction action = new MyAction();
-	
-	loginAndAction(name, action);
+	loginAndAction(name);
     }
 
-    static void loginAndAction(String name, PrivilegedExceptionAction action)
-	throws LoginException, PrivilegedActionException {
+    static void loginAndAction(String name)
+	throws LoginException {
 
 	// Create a callback handler
 	CallbackHandler callbackHandler = new MyCallbackHandler();
@@ -90,39 +86,13 @@ public class Jaas {
 
 	// Perform action as authenticated user
 	Subject subject = context.getSubject();
-	if (verbose) {
-	    System.out.println(subject.toString());
-	} else {
-	    System.out.println("Authenticated principal: " +
-		subject.getPrincipals());
-	}
-
-	Subject.doAs(subject, action);
+	// System.out.println(subject.toString());
+        System.out.println("Authenticated principal: " + subject.getPrincipals());
 
 	context.logout();
     }
-
-    // Action to perform
-    static class MyAction implements PrivilegedExceptionAction {
-	MyAction() {
-	}
-
-	public Object run() throws Exception {
-	    // Replace the following with an action to be performed
-	    // by authenticated user
-	    System.out.println("Performing secure action ...");
-	    return null;
-	}
-    }
 }
 
-/**
- * The application implements the CallbackHandler.
- *
- * <p> This application is text-based.  Therefore it displays information
- * to the user using the OutputStreams System.out and System.err,
- * and gathers input from the user using the InputStream System.in.
- */
 class MyCallbackHandler implements CallbackHandler {
 
     /**
@@ -134,50 +104,18 @@ class MyCallbackHandler implements CallbackHandler {
      *                  the information requested by an underlying security
      *                  service to be retrieved or displayed.
      *
-     * @exception java.io.IOException if an input or output error occurs. <p>
-     *
      * @exception UnsupportedCallbackException if the implementation of this
      *                  method does not support one or more of the Callbacks
      *                  specified in the <code>callbacks</code> parameter.
      */
     public void handle(Callback[] callbacks)
-    throws IOException, UnsupportedCallbackException {
+    throws UnsupportedCallbackException {
 
         for (int i = 0; i < callbacks.length; i++) {
-            if (callbacks[i] instanceof TextOutputCallback) {
+            if (callbacks[i] instanceof PasswordCallback) {
 
-                // display the message according to the specified type
-                TextOutputCallback toc = (TextOutputCallback)callbacks[i];
-                switch (toc.getMessageType()) {
-                case TextOutputCallback.INFORMATION:
-                    System.out.println(toc.getMessage());
-                    break;
-                case TextOutputCallback.ERROR:
-                    System.out.println("ERROR: " + toc.getMessage());
-                    break;
-                case TextOutputCallback.WARNING:
-                    System.out.println("WARNING: " + toc.getMessage());
-                    break;
-                default:
-                    throw new IOException("Unsupported message type: " +
-                                        toc.getMessageType());
-                }
-
-            } else if (callbacks[i] instanceof NameCallback) {
-
-                // prompt the user for a username
-                NameCallback nc = (NameCallback)callbacks[i];
-
-                System.err.print(nc.getPrompt());
-                System.err.flush();
-                nc.setName("yyy");
-
-            } else if (callbacks[i] instanceof PasswordCallback) {
-
-                // prompt the user for sensitive information
+                // Or prompt the user for sensitive information
                 PasswordCallback pc = (PasswordCallback)callbacks[i];
-                System.err.print(pc.getPrompt());
-                System.err.flush();
                 pc.setPassword("xxx".toCharArray());
 
             } else {

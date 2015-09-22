@@ -1,0 +1,3 @@
+javac -Xlint:unchecked Jaas.java
+java -Djava.security.auth.login.config=jaas-krb5.conf -Djava.security.krb5.conf=krb5.conf Jaas client
+

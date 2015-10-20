@@ -54,35 +54,32 @@ public class SearchLDAP {
                                                "(objectClass=*)", searchControls);
 
             // Loop through the objects returned in the search
-            while (objs.hasMoreElements())
-                {
-                    // Each item is a SearchResult object
-                    SearchResult match = (SearchResult) objs.nextElement();
+            while (objs.hasMoreElements()) {
+                // Each item is a SearchResult object
+                SearchResult match = (SearchResult) objs.nextElement();
 
-                    // Print out the node name
-                    System.out.println("node: " + match.getName() + "");
+                // Print out the node name
+                System.out.println("node: " + match.getName() + "");
 
-                    // Get the node's attributes
-                    Attributes attrs = match.getAttributes();
+                // Get the node's attributes
+                Attributes attrs = match.getAttributes();
 
-                    NamingEnumeration e = attrs.getAll();
+                NamingEnumeration e = attrs.getAll();
 
-                    // Loop through the attributes
-                    while (e.hasMoreElements())
-                        {
-                            // Get the next attribute
-                            Attribute attr = (Attribute) e.nextElement();
+                // Loop through the attributes
+                while (e.hasMoreElements()) {
+                    // Get the next attribute
+                    Attribute attr = (Attribute) e.nextElement();
 
-                            // Print out the attribute's value(s)
-                            System.out.println ("attr: " + attr.getID() + " = ");
-                            for (int i=0; i < attr.size(); i++)
-                                {
-                                    System.out.println ("    : " + attr.get(i));
-                                }
-                            System.out.println();
-                        }
-                    System.out.println("---------------------------------------");
+                    // Print out the attribute's value(s)
+                    System.out.println ("attr: " + attr.getID() + " = ");
+                    for (int i=0; i < attr.size(); i++) {
+                        System.out.println ("    : " + attr.get(i));
+                    }
+                    System.out.println();
                 }
+                System.out.println("---------------------------------------");
+            }
 
             // Here we unbind from the LDAP server.
             dc.close();

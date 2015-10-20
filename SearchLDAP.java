@@ -50,7 +50,7 @@ public class SearchLDAP {
 
             // Search for items with the specified attribute starting
             // at the top of the search tree
-            NamingEnumeration objs = dc.search("ou=mathematicians,dc=example,dc=com",
+            NamingEnumeration objs = dc.search("dc=example,dc=com",
                                                "(objectClass=*)", searchControls);
 
             // Loop through the objects returned in the search

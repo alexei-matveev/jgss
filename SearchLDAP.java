@@ -26,13 +26,17 @@ public class SearchLDAP {
                 "com.sun.jndi.ldap.LdapCtxFactory");
         // The provider URL is an LDAP URL that tells JNDI
         // where it will need to connect to.
-        env.put(DirContext.PROVIDER_URL,"ldap://localhost:389");
+        env.put(DirContext.PROVIDER_URL,"ldap://ldap.forumsys.com:389");
+        env.put(DirContext.SECURITY_AUTHENTICATION, "simple");
+        env.put(DirContext.SECURITY_PRINCIPAL, "cn=read-only-admin,dc=example,dc=com");
+        env.put(DirContext.SECURITY_CREDENTIALS, "password");
         try {
             // Here we create a DirContext object using
             // the environment we setup above. This
             // object will be used to communicate with
             // the server.
             DirContext dc = new InitialDirContext(env);
+            System.out.println(dc.getEnvironment());
             // Above we mentioned the filter and base.
             // Another important part of the search criteria
             // is the scope. There are three scopes: base (this
@@ -40,21 +44,46 @@ public class SearchLDAP {
             // entry), and subtree (this entry and all of its
             // decendents in the tree). In JNDI, OBJECT_SCOPE
             // indicates a base search.
-            SearchControls sc = new SearchControls();
-            sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-NamingEnumeration ne = null;
-            // Here we actually perform the search.
-            ne = dc.search(base, filter, sc);
-            // We cycle through the NamingEnumeration
-            // that is returned by the search.
-            while (ne.hasMore()) {
-                // Retrieve the result as a SearchResult
-                // and print it (not very pretty). There are
-                // methods for extracting the attributes and
-                // values without printing, as well.
-                SearchResult sr = (SearchResult) ne.next();
-                System.out.println(sr.toString()+"\n");
-            }
+
+            SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+            // Search for items with the specified attribute starting
+            // at the top of the search tree
+            NamingEnumeration objs = dc.search("ou=mathematicians,dc=example,dc=com",
+                                               "(objectClass=*)", searchControls);
+
+            // Loop through the objects returned in the search
+            while (objs.hasMoreElements())
+                {
+                    // Each item is a SearchResult object
+                    SearchResult match = (SearchResult) objs.nextElement();
+
+                    // Print out the node name
+                    System.out.println("node: " + match.getName() + "");
+
+                    // Get the node's attributes
+                    Attributes attrs = match.getAttributes();
+
+                    NamingEnumeration e = attrs.getAll();
+
+                    // Loop through the attributes
+                    while (e.hasMoreElements())
+                        {
+                            // Get the next attribute
+                            Attribute attr = (Attribute) e.nextElement();
+
+                            // Print out the attribute's value(s)
+                            System.out.println ("attr: " + attr.getID() + " = ");
+                            for (int i=0; i < attr.size(); i++)
+                                {
+                                    System.out.println ("    : " + attr.get(i));
+                                }
+                            System.out.println();
+                        }
+                    System.out.println("---------------------------------------");
+                }
+
             // Here we unbind from the LDAP server.
             dc.close();
         } catch (NamingException nex) {
